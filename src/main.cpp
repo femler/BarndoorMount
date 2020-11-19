@@ -3,7 +3,9 @@
 
 // Motor steps per revolution. Most steppers are 200 steps or 1.8 degrees/step
 #define MOTOR_STEPS 200
-#define RPM 5
+#define TrackRPM 5 // RPM for Tracking
+#define RewRPM 20 // RPM for Rewind
+
 
 // Microstepping muss extern geschaltet und mit der angegebenen grösse übereinstimmen
 #define MICROSTEPS 8
@@ -12,11 +14,19 @@
 #define DIR 2
 #define STEP 3
 
+// Set the LED pins for operation mode
+#define RunLED 5 // Tracking in progress
+#define RewLED 6 // Rewind the Tracker
+
+// Set the button pins
+#define TrackBtn 10 // Start/Stop tracking
+#define RewBtn 11 // Rewind the Tracker
+
 // 2-wire basic config, microstepping is hardwired on the driver
 BasicStepperDriver stepper(MOTOR_STEPS, DIR, STEP);
 
 void setup() {
-  stepper.begin(RPM, MICROSTEPS);
+  stepper.begin(TrackRPM, MICROSTEPS);
   Serial.begin(9600);
 }
 
