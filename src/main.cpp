@@ -14,6 +14,10 @@
 #define DIR 2
 #define STEP 3
 
+////////////////////////////////////////////
+// ATTENTION pin numbering not definitive //
+////////////////////////////////////////////
+
 // Set the LED pins for operation mode
 #define RunLED 5 // Tracking in progress
 #define RewLED 6 // Rewind the Tracker
@@ -21,6 +25,11 @@
 // Set the button pins
 #define TrackBtn 10 // Start/Stop tracking
 #define RewBtn 11 // Rewind the Tracker
+
+// Set the safety swich pins
+#define MaxOpen 13  // Barndoor mount reached max open point
+#define MinOpen 14  // Mount is fully closed
+
 
 // 2-wire basic config, microstepping is hardwired on the driver
 BasicStepperDriver stepper(MOTOR_STEPS, DIR, STEP);
