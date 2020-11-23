@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <AccelStepper.h>
+#include <BasicStepperDriver.h>
 
 // Motor steps per revolution. Most steppers are 200 steps or 1.8 degrees/step
 #define MOTOR_STEPS 200
@@ -30,47 +30,36 @@
 #define MaxOpen 13  // Barndoor mount reached max open point
 #define MinOpen 14  // Mount is fully closed
 
-#define interval 5000
-
-bool Toggle=LOW;
-unsigned long previousMillis = 0;
 
 // 2-wire basic config, microstepping is hardwired on the driver
-AccelStepper AccStep = AccelStepper(1,STEP,DIR);
-
-void RunFwd(){
-  Serial.println("Jetzt gehts vorwärts");
-  delay(500);
-  AccStep.setSpeed(100);
-  
-}
-
-void RunRew(){
-  Serial.println("Jetzt gehts rückwärts");
-  delay(500);
-  AccStep.setSpeed(-100);
-}
+BasicStepperDriver stepper(MOTOR_STEPS, DIR, STEP);
 
 void setup() {
-  AccStep.setMaxSpeed(2000);
-  //AccStep.setAcceleration(20);
+  stepper.begin(TrackRPM, MICROSTEPS);
   Serial.begin(9600);
 }
 
 void loop() {
-  unsigned long currentMillis = millis();
+  // Eine Umdrehung im Uhrzeigersinn
+  //Serial.println("Die Rotation beginn...");
+  //stepper.rotate(360);
+  //Serial.println("Die Rotation ist fertig...");
+
+  Serial.println("Es rotiert wieder!");
+  stepper.setRPM(RewRPM);
+  stepper.startMove(MOTOR_STEPS);
+  //stepper.startRotate(360);
+  Serial.println("Dies sollte vor dem Ende der Rotation angezeigt werden!");
+  stepper.setRPM(TrackRPM);
+
+  delay(2000);
+
+  // Vier mal eine viertel Umdrehung zurück
+  //for (int i = 0; i < 5; i++) {
+  //  stepper.rotate(-90);
+  //  delay(1000);
+  //}
   
-  if (currentMillis - previousMillis >= interval) {
-    previousMillis = currentMillis;
-    if (Toggle) {
-      Toggle = !Toggle;
-      RunFwd();
-    } else {
-      Toggle = !Toggle;
-      RunRew();
-    }
-
-  }
-  AccStep.runSpeed();
+  // Dies ist nur mal ein kleiner Test
+    
 }
-
