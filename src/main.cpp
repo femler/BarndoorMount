@@ -19,7 +19,7 @@
 ////////////////////////////////////////////
 
 // Set the LED pins for operation mode
-#define RunLED 10 // Tracking in progress
+#define TrkLED 10 // Tracking in progress
 #define RewLED 11 // Rewind the Tracker
 
 // Set the button pins
@@ -40,6 +40,7 @@ boolean isRewinding=false;
 
 int goTracking = 1;
 int goRewind = 1;
+int lastGoRewind = 1;
 
 // 2-wire basic config, microstepping is hardwired on the driver
 AccelStepper AccStep = AccelStepper(1,STEP,DIR);
@@ -61,6 +62,8 @@ void setup() {
   //AccStep.setAcceleration(20);
   pinMode(TrackBtn,INPUT_PULLUP);
   pinMode(RewBtn,INPUT_PULLUP);
+  pinMode(TrkLED,OUTPUT);
+  pinMode(RewLED,OUTPUT);
 
   Serial.begin(9600);
 }
@@ -79,23 +82,25 @@ void loop() {
   //   }
 
   // }
+  lastGoRewind = goRewind;
 
   goTracking = digitalRead(TrackBtn);
   goRewind = digitalRead(RewBtn);
 
   if (goTracking==LOW){
     isTracking = !isTracking;
+    digitalWrite(TrkLED, HIGH);
     RunFwd();
   }
 
-  if (goRewind==LOW){
+  if (goRewind != lastGoRewind){
     isRewinding = !isRewinding;
     isTracking = false;
+    digitalWrite(RewLED, HIGH);
     RunRew();
-    AccStep.runSpeed();
   }
 
-  if (isTracking) {
+  if (isTracking or isRewinding) {
     AccStep.runSpeed();
   }
 }
