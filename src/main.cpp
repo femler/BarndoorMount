@@ -6,7 +6,6 @@
 #define TrackRPM 5 // RPM for Tracking
 #define RewRPM 20 // RPM for Rewind
 
-
 // Microstepping muss extern geschaltet und mit der angegebenen grösse übereinstimmen
 #define MICROSTEPS 8
 
@@ -23,24 +22,21 @@
 #define RewLED 11 // Rewind the Tracker
 
 // Set the button pins
-#define TrackBtn 5 // Start/Stop tracking
+#define TrkBtn 5 // Start/Stop tracking
 #define RewBtn 6 // Rewind the Tracker
 
-// Set the safety swich pins
+// Set the safety swich pins NOT IMPLEMENTED YET
 #define MaxOpen 13  // Barndoor mount reached max open point
 #define MinOpen 14  // Mount is fully closed
 
-#define interval 5000
+// Define the run varables
+boolean isTracking = false;
+boolean isRewinding = false;
 
-//bool Toggle=LOW;
-unsigned long prevMill = 0;
-
-boolean isTracking=false;
-boolean isRewinding=false;
-
-int goTracking = 1;
-int goRewind = 1;
-int lastGoRewind = 1;
+// Define the run check variables
+boolean goTracking = true;
+boolean goRewind = true;
+boolean lastGoRewind = true;
 
 // 2-wire basic config, microstepping is hardwired on the driver
 AccelStepper AccStep = AccelStepper(1,STEP,DIR);
@@ -60,43 +56,51 @@ void RunRew(){
 void setup() {
   AccStep.setMaxSpeed(2000);
   //AccStep.setAcceleration(20);
-  pinMode(TrackBtn,INPUT_PULLUP);
+
+  // Setting button pins
+  pinMode(TrkBtn,INPUT_PULLUP);
   pinMode(RewBtn,INPUT_PULLUP);
+  
+  // Setting LED pins
   pinMode(TrkLED,OUTPUT);
   pinMode(RewLED,OUTPUT);
+
+  // Setting initial LED states
+  digitalWrite(TrkLED,LOW);
+  digitalWrite(RewLED,LOW);
 
   Serial.begin(9600);
 }
 
 void loop() {
-  
-  
-  // if (currentMillis - previousMillis >= interval) {
-  //   previousMillis = currentMillis;
-  //   if (Toggle) {
-  //     Toggle = !Toggle;
-  //     RunFwd();
-  //   } else {
-  //     Toggle = !Toggle;
-  //     RunRew();
-  //   }
-
-  // }
+  // Set state change check for rewinding
   lastGoRewind = goRewind;
 
-  goTracking = digitalRead(TrackBtn);
+  // Read the button states
+  goTracking = digitalRead(TrkBtn);
   goRewind = digitalRead(RewBtn);
 
-  if (goTracking==LOW){
+  // Check tracking button
+  if (goTracking == LOW and !isRewinding){
+    // Toggle run variable for tracking
     isTracking = !isTracking;
-    digitalWrite(TrkLED, HIGH);
+    
+    // Toggle the tracking LED
+    digitalWrite(TrkLED, !digitalRead(TrkLED));
+    Serial.println("TrkLED ist: "+String(digitalRead(TrkLED)));
     RunFwd();
   }
 
   if (goRewind != lastGoRewind){
+    // Toggle run variable for rewinding
     isRewinding = !isRewinding;
     isTracking = false;
-    digitalWrite(RewLED, HIGH);
+
+    // Toggle rewind LED and reset tracking LED
+    digitalWrite(RewLED, !digitalRead(RewLED));
+    digitalWrite(TrkLED, LOW);
+    Serial.println("RewLED ist: "+String(digitalRead(RewLED)));
+    Serial.println("TrkLED ist: "+String(digitalRead(TrkLED)));
     RunRew();
   }
 
